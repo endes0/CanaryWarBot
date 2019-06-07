@@ -50,7 +50,6 @@ proc normalTurn(): tuple[map, txt: string] =
     var playersList = Municipe.getMany(limit=300)
     var player = playersList[rand(playersList.len-1)]
     var realPlayer = if player.conquestedBy != -1: player.conquestedBy else: player.id
-    var realColor = if player.conquestedBy != -1: player.color else: player.color
     var conquest = playersList[rand(playersList.len-1)]
     var fail = 0
     while true:
@@ -80,7 +79,7 @@ proc normalTurn(): tuple[map, txt: string] =
     conquest.update()
     turn.insert()
 
-    result.map = generateMap(conquest.mapId, realColor)
+    result.map = generateMap(conquest.mapId, player.mapId)
     
 proc superiroInvasionTurn(): tuple[map, txt: string] =
   var ran = rand(30)
@@ -91,6 +90,7 @@ proc superiroInvasionTurn(): tuple[map, txt: string] =
       result.txt = selText(Marroc)
     else:
       result.txt = selText(Cat)
+    result.txt = result.txt.process(Turn.getMany(limit=1, cond="true ORDER BY id DESC")[0].id + 2, 0, 0)    
     result.map = generateSuperiorMap()
 
 proc independenceTurn(): tuple[map, txt: string] =
@@ -105,7 +105,7 @@ proc independenceTurn(): tuple[map, txt: string] =
         player.conquestedBy = -1
         player.update()
         turn.insert()
-        result.map = generateMap(player.mapId, player.color)    
+        result.map = generateMap(player.mapId, player.mapId)    
         break
       
       
@@ -113,7 +113,7 @@ proc makeTurnHandler(bot: TeleBot) =
   randomize()
   var ran = rand(100)
   var final: tuple[map, txt: string]
-  if ran < 80:
+  if ran < 85:
     final= normalTurn()
   elif ran < 95:
     final= independenceTurn()
